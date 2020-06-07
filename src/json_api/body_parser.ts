@@ -1,13 +1,14 @@
 import { ServerRequest } from "https://deno.land/std/http/mod.ts";
 import { decode } from "https://deno.land/std/encoding/utf8.ts";
+import { ContentType } from "./content_type.ts";
 
 export class BodyParser {
   static async parse(req: ServerRequest) {
-    const bodyBuff = await Deno.readAll(req.body);
-    const body = decode(bodyBuff);
+    const bodyBuffer = await Deno.readAll(req.body);
+    const body = decode(bodyBuffer);
 
     const contentType = req.headers.get("content-type");
-    if (contentType === "application/json") {
+    if (contentType === ContentType.JSON) {
       try {
         return JSON.parse(body);
       } catch (e) {
