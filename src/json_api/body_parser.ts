@@ -1,5 +1,5 @@
-import { ServerRequest } from "https://deno.land/std/http/mod.ts";
 import { decode } from "https://deno.land/std/encoding/utf8.ts";
+import { ServerRequest } from "https://deno.land/std/http/mod.ts";
 import { ContentType } from "./content_type.ts";
 
 export class BodyParser {

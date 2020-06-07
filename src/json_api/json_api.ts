@@ -1,9 +1,9 @@
 import {
+  HTTPOptions,
   serve,
-  Status,
   Server,
   ServerRequest,
-  HTTPOptions,
+  Status,
 } from "https://deno.land/std/http/mod.ts";
 import { BodyParser } from "./body_parser.ts";
 import { ContentType } from "./content_type.ts";
@@ -21,7 +21,8 @@ export interface ApiContext {
 }
 
 export interface Handler {
-  handler(ctx: ApiContext): Promise<ApiResponse | undefined>;
+  handler?(ctx: ApiContext): Promise<ApiResponse | undefined | void>;
+  errorHandler?(ctx: ApiContext): Promise<ApiResponse | undefined | void>;
 }
 
 export class JsonApi {
@@ -40,18 +41,40 @@ export class JsonApi {
     let response: ApiResponse = {};
     response.headers = new Headers();
 
-    try {
-      for (const instance of this.handlers) {
-        let newResponse = await instance.handler({ request, body, response });
-        if (newResponse !== response) {
-          Object.assign(response, newResponse);
+    for (const instance of this.handlers) {
+      if (instance.handler && !response.error) {
+        try {
+          const newResponse = await instance.handler({
+            request,
+            body,
+            response,
+          });
+
+          if (newResponse !== response) {
+            Object.assign(response, newResponse);
+          }
+        } catch (e) {
+          response.error = e;
         }
       }
-    } catch (e) {
-      response.error = e;
-    } finally {
-      return response;
+
+      if (instance.errorHandler && response.error) {
+        try {
+          const newResponse = await instance.errorHandler({
+            request,
+            body,
+            response,
+          });
+
+          if (newResponse !== response) {
+            Object.assign(response, newResponse);
+          }
+        } catch (e) {
+          response.error = e;
+        }
+      }
     }
+    return response;
   }
 
   async handleResponse({ request, response }: ApiContext) {
