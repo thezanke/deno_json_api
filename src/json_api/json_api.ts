@@ -35,22 +35,20 @@ export class JsonApi {
   }
 
   async getResponse({ request, body }: { request: ServerRequest; body: any }) {
-    return {
-      status: Status.InternalServerError,
-      message: STATUS_TEXT.get(Status.InternalServerError),
-    };
-    // try {
-    //   for (const entry of this.handlers) {
-    //     const response = entry.handler({ request, body, api: this });
-    //     return response;
-    //   }
-    // } catch (e) {
-    //   console.trace(e);
-    //   return {
-    //     status: Status.InternalServerError,
-    //     message: STATUS_TEXT.get(Status.InternalServerError),
-    //   };
-    // }
+    const api = this;
+
+    try {
+      for (const instance of this.handlers) {
+        const response = await instance.handler({ request, body, api });
+        return response;
+      }
+    } catch (e) {
+      console.trace(e);
+      return {
+        status: Status.InternalServerError,
+        message: STATUS_TEXT.get(Status.InternalServerError),
+      };
+    }
   }
 
   async handleResponse(request: ServerRequest, responsePayload: any) {
@@ -62,12 +60,10 @@ export class JsonApi {
   }
 
   async start() {
-    console.log("api started");
     for await (const request of this.server) {
       const body = await BodyParser.parse(request);
-      request.respond({ status: Status.OK });
-      // const responsePayload = await this.getResponse({ request, body });
-      // this.handleResponse(request, responsePayload);
+      const responsePayload = await this.getResponse({ request, body });
+      await this.handleResponse(request, responsePayload);
     }
   }
 }
