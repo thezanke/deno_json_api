@@ -3,13 +3,10 @@ import {
   Status,
   Server,
   ServerRequest,
+  HTTPOptions,
 } from "https://deno.land/std/http/mod.ts";
 import { BodyParser } from "./body_parser.ts";
 import { ContentType } from "./content_type.ts";
-
-interface ApiOptions {
-  port: number;
-}
 
 export interface ApiResponse {
   status?: number;
@@ -31,8 +28,8 @@ export class JsonApi {
   public server: Server;
   private handlers: Array<Handler> = [];
 
-  constructor({ port = 8000 }: ApiOptions) {
-    this.server = serve({ port });
+  constructor(addr: string | HTTPOptions) {
+    this.server = serve(addr);
   }
 
   addHandler(h: Handler) {
