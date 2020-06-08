@@ -34,6 +34,7 @@ export class JsonApi {
   }
 
   addHandler(h: Handler) {
+    console.log('add handler');
     this.handlers.push(h);
   }
 
