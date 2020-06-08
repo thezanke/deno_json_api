@@ -34,7 +34,6 @@ export class JsonApi {
   }
 
   addHandler(h: Handler) {
-    throw new Error('what');
     this.handlers.push(h);
   }
 
