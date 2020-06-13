@@ -8,13 +8,18 @@ export class BodyParser {
     const body = decode(bodyBuffer);
 
     const contentType = req.headers.get("content-type");
-    if (contentType === ContentType.JSON) {
-      try {
-        return JSON.parse(body);
-      } catch (e) {
-        console.error("Couldn't parse JSON body:\n", body);
-        return null;
+    try {
+      switch (contentType) {
+        case ContentType.JSON: {
+          return JSON.parse(body);
+        }
+        case ContentType.formEncoded: {
+          return Object.fromEntries(new URLSearchParams(body));
+        }
       }
+    } catch (e) {
+      console.error(`Couldn't parse ${contentType} body:\n`, body);
+      return null;
     }
 
     return body;

@@ -29,7 +29,7 @@ export class JsonApi {
   public server: Server;
   private handlers: Array<Handler> = [];
 
-  constructor(addr: string | HTTPOptions) {
+  constructor(public addr: string | HTTPOptions) {
     this.server = serve(addr);
   }
 
